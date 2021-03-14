@@ -11,12 +11,17 @@ for folder in [book_data_folder, book_cover_folder]:
         os.mkdir(folder)
 
 
-def book_data(search_term: str, save_data: bool = True):
+def book_data(search_term: str, author: str = '', save_data: bool = True):
     url_base = 'http://openlibrary.org/'
     parameters = {'q': search_term.replace(' ', '+')}
     r = requests.get(url_base + 'search.json', params=parameters)
     jr = r.json()
-    book = jr['docs'][0]
+    if author != '':
+        for bk in jr['docs']:
+            if bk.get('author_name', [''])[0].lower() == author:
+                book = bk
+    else:
+        book = jr['docs'][0]
     if save_data:
         with open(os.path.join(book_data_folder, book.get('title') + '.json'), 'w') as f:
             json.dump(book, f)
@@ -33,5 +38,5 @@ def book_cover(book: dict, save_image: bool = True):
 
 
 if __name__ == '__main__':
-    book = book_data('a gentleman in moscow')
+    book = book_data(search_term='a gentleman in moscow', author='amor towles')
     book_cover(book)
